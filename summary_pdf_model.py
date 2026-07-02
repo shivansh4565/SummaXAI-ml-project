@@ -107,8 +107,24 @@ st.markdown(
 
 @st.cache_resource
 def load_model():
+    # Try Streamlit Secrets first (for deployment)
+    api_key = st.secrets.get("MISTRAL_API_KEY")
+
+    # Fallback to .env (for local development)
+    if api_key is None:
+        api_key = os.getenv("MISTRAL_API_KEY")
+
+    if not api_key:
+        st.error(
+            "❌ MISTRAL_API_KEY not found.\n\n"
+            "Add it to your .env file for local development "
+            "or to Streamlit Secrets when deployed."
+        )
+        st.stop()
+
     return ChatMistralAI(
         model="mistral-small-2506",
+        api_key=api_key,
         temperature=0.3
     )
 
